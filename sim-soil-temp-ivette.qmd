@@ -46,7 +46,10 @@ ggplot(fragment_summary, aes(x = canopy_cover, y = prop_survived)) + geom_point(
 ## Write a paragraph above the code chunk explaining:
 
 ---
-The research question is: Does canopy cover affect salamander survival? #- What is the experimental design? 12 forest fragments and 20 salamanders per fragment (240 total salamanders) #- The response variable is Salamander survival and it is a categorical variable #- Why does this structure matter for the analysis?
+The research question is: Does canopy cover affect salamander survival? 
+What is the experimental design? 12 forest fragments and 20 salamanders per fragment (240 total salamanders) 
+The response variable is Salamander survival and it is a categorical variable 
+Why does this structure matter for the analysis?
 ---
 
 ## Step 2 Fit the wrong model
