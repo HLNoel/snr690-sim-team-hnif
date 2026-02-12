@@ -4,4 +4,67 @@ format: html
 editor: visual
 ---
 
-## New file
+In this simulation, the research questions is whether there is a difference in yield based on the variety of wheat grown. The response variable is the yield of the wheat. In this experiment, there are five wheat varieties that are being tested. To account for variation between fields, four blocks were used with random plots assigned to each block. These blocks are used because if you only test within one field, the model and data only show you the effects of wheat variety on yield within that one spatial location. The blocks make the data more "generalized".
+
+```{r}
+library(tidyverse) #calling tidyverse 
+
+set.seed(123) #setting seed for reproducibility 
+
+# Define experimental structure
+varieties <- c("A", "B", "C", "D", "E")
+blocks <- c("Block1", "Block2", "Block3", "Block4") #this is setting up the simulated data (verieties and blocks) 
+
+# Define the truth
+baseline_yield <- 3000  # kg/ha for variety A in block 1
+
+variety_effects <- c(
+  A = 0,
+  B = 200,
+  C = 350,
+  D = 100,
+  E = -50
+)  #how variety effects yield 
+
+block_effects <- c(
+  Block1 = 0,
+  Block2 = 150,
+  Block3 = -100,
+  Block4 = 200
+)
+  #random effects of blocks 
+noise_sd <- 120
+
+# Create all combinations of variety and block (full factorial design)
+wheat_data <- expand.grid(
+  variety = varieties,
+  block = blocks
+) #simulate the random block design 
+
+# Add true yield based on variety and block effects
+wheat_data <- wheat_data %>% #making the data frame 
+  mutate(
+    variety_effect = variety_effects[variety],
+    block_effect = block_effects[block],
+    true_yield = baseline_yield + variety_effect + block_effect,
+    yield = true_yield + rnorm(n(), mean = 0, sd = noise_sd)
+  )
+
+# Look at the data
+head(wheat_data)
+summary(wheat_data)
+
+# Visualize
+ggplot(wheat_data, aes(x = variety, y = yield, color = block)) +
+  geom_point(size = 4, alpha = 0.7, position = position_dodge(width = 0.3)) +
+  stat_summary(fun = mean, geom = "crossbar", width = 0.5, 
+               color = "black", size = 0.3) +
+  labs(
+    title = "Simulated: Wheat Variety Yields Across Blocks",
+    subtitle = "Each point = one plot; crossbar = variety mean across blocks",
+    x = "Wheat Variety",
+    y = "Yield (kg/ha)",
+    color = "Block"
+  ) +
+  theme_minimal(base_size = 14) #plotting the data to show how variety effects yield 
+```
