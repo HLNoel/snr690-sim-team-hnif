@@ -4,72 +4,63 @@ format: html
 editor: visual
 ---
 
-library(tidyverse)
-library(lme4)  # for mixed models later
+library(tidyverse) library(lme4) \# for mixed models later
 
 set.seed(42)
 
 # Define the experimental structure
-n_fragments <- 12
-n_salamanders_per_fragment <- 20
-n_total <- n_fragments * n_salamanders_per_fragment
+
+n_fragments \<- 12 n_salamanders_per_fragment \<- 20 n_total \<- n_fragments \* n_salamanders_per_fragment
 
 # Define the truth
-true_intercept <- -3.5          
-true_canopy_effect <- 0.09    
+
+true_intercept \<- -3.5\
+true_canopy_effect \<- 0.09
 
 # Create fragment-level data
-fragment_data <- data.frame(
-  fragment_id = 1:n_fragments,
-  canopy_cover = runif(n_fragments, min = 40, max = 90)
-)
+
+fragment_data \<- data.frame( fragment_id = 1:n_fragments, canopy_cover = runif(n_fragments, min = 40, max = 90) )
 
 # Create salamander-level data (each salamander belongs to a fragment)
-salamander_data <- data.frame(
-  salamander_id = 1:n_total,
-  fragment_id = rep(1:n_fragments, each = n_salamanders_per_fragment)
-)
+
+salamander_data \<- data.frame( salamander_id = 1:n_total, fragment_id = rep(1:n_fragments, each = n_salamanders_per_fragment) )
 
 # Merge to get canopy cover for each salamander
-salamander_data <- salamander_data %>%
-  left_join(fragment_data, by = "fragment_id")
+
+salamander_data \<- salamander_data %\>% left_join(fragment_data, by = "fragment_id")
 
 # Simulate survival using logistic regression formula
-salamander_data <- salamander_data %>%
-  mutate(
-    log_odds = true_intercept + true_canopy_effect * canopy_cover,
-    prob_survival = 1 / (1 + exp(-log_odds)),
-    survived = rbinom(n_total, size = 1, prob = prob_survival)
-  )
+
+salamander_data \<- salamander_data %\>% mutate( log_odds = true_intercept + true_canopy_effect \* canopy_cover, prob_survival = 1 / (1 + exp(-log_odds)), survived = rbinom(n_total, size = 1, prob = prob_survival) )
 
 # Look at the data
-head(salamander_data)
-summary(salamander_data)
+
+head(salamander_data) summary(salamander_data)
 
 # Visualize: proportion surviving in each fragment
-fragment_summary <- salamander_data %>%
-  group_by(fragment_id, canopy_cover) %>%
-  summarise(
-    n_survived = sum(survived),
-    n_total = n(),
-    prop_survived = n_survived / n_total,
-    .groups = "drop"
-  )
 
-ggplot(fragment_summary, aes(x = canopy_cover, y = prop_survived)) +
-  geom_point(size = 4, alpha = 0.7) +
-  labs(
-    title = "Simulated: Canopy Cover vs. Salamander Survival",
-    subtitle = "Each point = one forest fragment (20 salamanders each)",
-    x = "Canopy Cover (%)",
-    y = "Proportion Survived"
-  ) +
-  ylim(0, 1) +
-  theme_minimal(base_size = 14)
-  
-## Write a paragraph above the code chunk explaining: 
-#- The research question is: Does canopy cover affect salamander survival?
-#- What is the experimental design? 12 forest fragments and 20 salamanders per fragment (240 total salamanders)
-#- The response variable is Salamander survival and it is a categorical variable
-#- Why does this structure matter for the analysis?
+fragment_summary \<- salamander_data %\>% group_by(fragment_id, canopy_cover) %\>% summarise( n_survived = sum(survived), n_total = n(), prop_survived = n_survived / n_total, .groups = "drop" )
 
+ggplot(fragment_summary, aes(x = canopy_cover, y = prop_survived)) + geom_point(size = 4, alpha = 0.7) + labs( title = "Simulated: Canopy Cover vs. Salamander Survival", subtitle = "Each point = one forest fragment (20 salamanders each)", x = "Canopy Cover (%)", y = "Proportion Survived" ) + ylim(0, 1) + theme_minimal(base_size = 14)
+
+## Write a paragraph above the code chunk explaining:
+
+---
+The research question is: Does canopy cover affect salamander survival? #- What is the experimental design? 12 forest fragments and 20 salamanders per fragment (240 total salamanders) #- The response variable is Salamander survival and it is a categorical variable #- Why does this structure matter for the analysis?
+---
+
+## Step 2 Fit the wrong model
+
+wrong_model \<- glm(survived \~ canopy_cover, family = binomial, data = salamander_data)
+
+summary(wrong_model)
+
+# Answer the following questions
+
+---
+What does this model assume about the salamanders?
+Are salamanders within the same fragment truly independent? Why or why not?
+What is the unit of replication in this experiment — the salamander or the fragment? 
+What problem might arise if we ignore the fragment structure? 
+Key question: If salamanders in the same fragment are more similar to each other than to salamanders in other fragments (e.g., because of fragment-specific conditions), what happens to our standard errors and p-values?
+---
