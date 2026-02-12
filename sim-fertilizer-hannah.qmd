@@ -68,3 +68,13 @@ ggplot(wheat_data, aes(x = variety, y = yield, color = block)) +
   ) +
   theme_minimal(base_size = 14) #plotting the data to show how variety effects yield 
 ```
+
+Fit the wrong model
+
+```{r}
+model1 <- aov(yield ~ variety, data=wheat_data)
+
+summary(model1)
+```
+
+This ANOVA model assumes that the blocks do not have any effect on the yield of wheat. However, this is flawed. For instance, if block 2 has a naturally higher-quality soil, this may impact out resulting yield, muddying our interpretation of the effect of wheat variety. If every variety grows better in that block, this will add variance and increase our average yield for all varieties. So, the true effect of yield may not be observed or portrayed by our model. Furthermore, this model would probably only be useful for our dataset, but not generally as all fields will have different soil qualities. Removing this from our experiment would be throwing away important information.
